@@ -60,6 +60,9 @@ export const FletesTable = ({ data }: Props) => {
                                 Costo Individual
                             </th>
                             <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Costo de gastos de autopista
+                            </th>
+                            <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Destino
                             </th>
                             <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -95,6 +98,11 @@ export const FletesTable = ({ data }: Props) => {
                                         {formatCurrency(flete.individualCost)}
                                     </div>
                                 </td>
+                                <div className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm font-semibold text-blue-600">
+                                        {formatCurrency(flete.highwayExpenseCost)}
+                                    </div>
+                                </div>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm text-gray-900">{flete.destination}</div>
                                 </td>
