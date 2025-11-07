@@ -6,6 +6,7 @@ export interface FletesFormData {
     idSupplier: number;
     idDestination: number;
     highwayExpenseCost: number;
+    costOfStay: number;
 };
 
 export interface FletesResponse {

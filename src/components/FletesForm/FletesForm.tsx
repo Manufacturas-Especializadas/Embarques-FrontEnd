@@ -10,7 +10,8 @@ export const FletesForm = () => {
     const [formData, setFormData] = useState<FletesFormData>({
         idSupplier: 0,
         idDestination: 0,
-        highwayExpenseCost: 0
+        highwayExpenseCost: 0,
+        costOfStay: 0
     });
     const [suppliers, setSuppliers] = useState<Suppliers[]>([]);
     const [destination, setDestination] = useState<Destination[]>([]);
@@ -79,7 +80,8 @@ export const FletesForm = () => {
                 setFormData({
                     idSupplier: 0,
                     idDestination: 0,
-                    highwayExpenseCost: 0
+                    highwayExpenseCost: 0,
+                    costOfStay: 0
                 });
 
                 setTimeout(() => {
@@ -156,6 +158,14 @@ export const FletesForm = () => {
                     type="number"
                     value={formData.highwayExpenseCost || ""}
                     onChange={(e) => handleInputChange("highwayExpenseCost", Number(e.target.value))}
+                    min="0"
+                />
+
+                <InputField
+                    label="Costo por estadía (opcional)"
+                    type="number"
+                    value={formData.costOfStay || ""}
+                    onChange={(e) => handleInputChange("costOfStay", Number(e.target.value))}
                     min="0"
                 />
 
