@@ -155,14 +155,16 @@ export const FletesIndex = () => {
                                     <p className="mt-1 text-sm text-gray-500">
                                         {searchTerm ? 'Intenta con otros términos de búsqueda.' : 'No hay fletes registrados aún.'}
                                     </p>
-                                    {!searchTerm && (
-                                        <button
-                                            onClick={handleCreate}
-                                            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-                                        >
-                                            Registrar primer flete
-                                        </button>
-                                    )}
+                                    <RoleGuard allowedRoles={["Admin"]}>
+                                        {!searchTerm && (
+                                            <button
+                                                onClick={handleCreate}
+                                                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                                            >
+                                                Registrar primer flete
+                                            </button>
+                                        )}
+                                    </RoleGuard>
                                 </div>
                             )
                         }
