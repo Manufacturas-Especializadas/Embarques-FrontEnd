@@ -1,16 +1,25 @@
-import type { ReactNode } from "react";
 import { useAuth } from "../../context/AuthContext";
 
-interface Props {
-    children: ReactNode;
+interface RoleGuardProps {
+    children: React.ReactNode;
     allowedRoles: string[];
+    fallback?: React.ReactNode;
 }
 
-export const RoleGuard = ({ children, allowedRoles }: Props) => {
-    const { user } = useAuth();
+export const RoleGuard = ({
+    children,
+    allowedRoles,
+    fallback = null
+}: RoleGuardProps) => {
+    const { user, isAuthenticated } = useAuth();
 
-    if (!user || !allowedRoles.includes(user.role)) {
-        return null;
+    if (!isAuthenticated) {
+        return <>{fallback}</>;
     }
-    return <>{children}</>
-}
+
+    if (!user?.role || !allowedRoles.includes(user.role)) {
+        return <>{fallback}</>;
+    }
+
+    return <>{children}</>;
+};
