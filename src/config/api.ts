@@ -7,6 +7,10 @@ if (!API_BASE_URL) {
 export const API_CONFIG = {
     baseUrl: API_BASE_URL,
     endpoints: {
+        auth: {
+            login: "/api/Auth/Login",
+            logout: "/api/Auth/Logout"
+        },
         generalList: {
             getFletes: "/api/GeneralLists/GetFletes",
             getSuppliers: "/api/GeneralLists/GetSuppliers",
