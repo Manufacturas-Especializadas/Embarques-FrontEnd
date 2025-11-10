@@ -7,6 +7,7 @@ import { Modal } from "../../components/Modal/Modal";
 import { FletesForm } from "../../components/FletesForm/FletesForm";
 import { generalListsService } from "../../api/services/GeneralListsService";
 import { useNavigate } from "react-router-dom";
+import { RoleGuard } from "../../components/RoleGuard/RoleGuard";
 
 export const FletesIndex = () => {
     const [fletes, setFletes] = useState<Flete[]>([]);
@@ -112,16 +113,18 @@ export const FletesIndex = () => {
                             </svg>
                             Reportes
                         </button>
-                        <button
-                            onClick={handleCreate}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors 
+                        <RoleGuard allowedRoles={["Admin"]}>
+                            <button
+                                onClick={handleCreate}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors 
                             duration-200 shadow-md flex items-center hover:cursor-pointer"
-                        >
-                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Nuevo Flete
-                        </button>
+                            >
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                Nuevo Flete
+                            </button>
+                        </RoleGuard>
                     </div>
                 </div>
 
