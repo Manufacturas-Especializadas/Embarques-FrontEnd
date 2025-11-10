@@ -6,6 +6,8 @@ export interface Flete {
     costOfStay: number;
     individualCost: number;
     date: string;
+    idSupplier: number;
+    idDestination: number;
 };
 
 export interface FletesTableProps {
