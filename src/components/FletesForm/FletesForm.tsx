@@ -5,8 +5,15 @@ import { generalListsService } from "../../api/services/GeneralListsService";
 import { fletesService, type FletesFormData } from "../../api/services/FletesService";
 import SelectField from "../Form/SelectField";
 import InputField from "../Form/InputField";
+import type { Flete } from "../../types/Flete";
 
-export const FletesForm = () => {
+interface Props {
+    flete?: Flete | null;
+    onSuccess?: () => void;
+    onCancel?: () => void;
+};
+
+export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
     const [formData, setFormData] = useState<FletesFormData>({
         idSupplier: 0,
         idDestination: 0,
@@ -18,17 +25,36 @@ export const FletesForm = () => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
-
+    const [isEditing] = useState(!!flete);
     const selectedDestinationCost = destination.find(dest => dest.id === formData.idDestination)?.cost || 0;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const suppliersResponse = await generalListsService.getSuppliers();
-                setSuppliers(suppliersResponse);
+                const [suppliersResponse, destinationResponse] = await Promise.all([
+                    generalListsService.getSuppliers(),
+                    generalListsService.getDestination()
+                ]);
 
-                const destinationResponse = await generalListsService.getDestination();
+                setSuppliers(suppliersResponse);
                 setDestination(destinationResponse);
+
+                if (flete) {
+                    const foundSupplier = suppliersResponse.find(
+                        s => s.supplierName === flete.supplier
+                    );
+
+                    const foundDestination = destinationResponse.find(
+                        d => d.destinationName === flete.destination
+                    );
+
+                    setFormData({
+                        idSupplier: foundSupplier?.id || 0,
+                        idDestination: foundDestination?.id || 0,
+                        highwayExpenseCost: flete.highwayExpenseCost || 0,
+                        costOfStay: flete.costOfStay || 0
+                    });
+                }
             } catch (error: any) {
                 console.error("Error fetching data: ", error);
                 setSuppliers([]);
@@ -36,7 +62,7 @@ export const FletesForm = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [flete]);
 
     const supplierOptions = suppliers.map(supplier => ({
         value: supplier.id,
@@ -57,7 +83,9 @@ export const FletesForm = () => {
         setSuccess("");
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
         if (!formData.idSupplier || !formData.idDestination) {
             setError("Por favor, selecciona un proveedor y una ruta");
             return;
@@ -73,30 +101,41 @@ export const FletesForm = () => {
         setSuccess("");
 
         try {
-            const response = await fletesService.create(formData);
+            let response;
+
+            if (isEditing && flete) {
+                response = await fletesService.update(flete.id, formData);
+            } else {
+                response = await fletesService.create(formData);
+            }
 
             if (response.success) {
-                setSuccess("Flete guardado");
-                setFormData({
-                    idSupplier: 0,
-                    idDestination: 0,
-                    highwayExpenseCost: 0,
-                    costOfStay: 0
-                });
+                setSuccess(isEditing ? "Flete actualizado correctamente" : "Flete guardado correctamente");
+
+                if (!isEditing) {
+                    setFormData({
+                        idSupplier: 0,
+                        idDestination: 0,
+                        highwayExpenseCost: 0,
+                        costOfStay: 0
+                    });
+                }
 
                 setTimeout(() => {
-                    setSuccess("");
-                }, 500);
+                    if (onSuccess) {
+                        onSuccess();
+                    }
+                }, 1500);
             }
 
         } catch (error: any) {
-            console.error("Error al guardar flete: ", error);
-            if (error.reponse?.data?.message) {
+            console.error(`Error al ${isEditing ? 'actualizar' : 'guardar'} flete: `, error);
+            if (error.response?.data?.message) {
                 setError(`Error: ${error.response.data.message}`);
             } else if (error.message) {
                 setError(`Error: ${error.message}`);
             } else {
-                setError("Error desconocido al guardar el flete");
+                setError(`Error desconocido al ${isEditing ? 'actualizar' : 'guardar'} el flete`);
             }
         } finally {
             setLoading(false);
@@ -169,15 +208,30 @@ export const FletesForm = () => {
                     min="0"
                 />
 
-                <div className="pt-4">
+                <div className="pt-4 flex gap-3">
+                    {onCancel && (
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            disabled={loading}
+                            className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2.5 px-4
+                            rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 
+                            focus:ring-offset-2 hover:cursor-pointer disabled:opacity-50"
+                        >
+                            Cancelar
+                        </button>
+                    )}
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4
                         rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 
-                        focus:ring-offset-2 hover:cursor-pointer"
+                        focus:ring-offset-2 hover:cursor-pointer disabled:opacity-50"
                     >
-                        {loading ? "Guardando..." : "Guardar"}
+                        {loading
+                            ? (isEditing ? "Actualizando..." : "Guardando...")
+                            : (isEditing ? "Actualizar" : "Guardar")
+                        }
                     </button>
                 </div>
             </div>

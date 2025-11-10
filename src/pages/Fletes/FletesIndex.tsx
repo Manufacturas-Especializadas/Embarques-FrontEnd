@@ -13,22 +13,53 @@ export const FletesIndex = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingFlete, setEditingFlete] = useState<Flete | null>(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
     const navigate = useNavigate();
 
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await generalListsService.getFletes();
+            setFletes(response);
+        } catch (error: any) {
+            console.error("Error fetching: ", error);
+            setFletes([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEdit = (flete: Flete) => {
+        setEditingFlete(flete);
+        setIsModalOpen(true);
+    };
+
+    const handleCreate = () => {
+        setEditingFlete(null);
+        setIsModalOpen(true);
+    };
+
+    const handleFormSuccess = () => {
+        setIsModalOpen(false);
+        setEditingFlete(null);
+        setRefreshTrigger(prev => prev + 1);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingFlete(null);
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const response = await generalListsService.getFletes();
-                setFletes(response);
-                setLoading(false);
-            } catch (error: any) {
-                console.error("Error fetching: ", error);
-                setFletes([]);
-            }
-        };
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (refreshTrigger > 0) {
+            fetchData();
+        }
+    }, [refreshTrigger]);
 
     const filteredFletes = fletes.filter(flete =>
         flete.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,7 +113,7 @@ export const FletesIndex = () => {
                             Reportes
                         </button>
                         <button
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={handleCreate}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors 
                             duration-200 shadow-md flex items-center hover:cursor-pointer"
                         >
@@ -107,7 +138,11 @@ export const FletesIndex = () => {
                             loading ? (
                                 <Loading />
                             ) : filteredFletes.length > 0 ? (
-                                <FletesTable data={filteredFletes} />
+                                <FletesTable
+                                    data={filteredFletes}
+                                    onDeleteSuccess={() => setRefreshTrigger(prev => prev + 1)}
+                                    onEdit={handleEdit}
+                                />
                             ) : (
                                 <div className="text-center py-12">
                                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,6 +152,14 @@ export const FletesIndex = () => {
                                     <p className="mt-1 text-sm text-gray-500">
                                         {searchTerm ? 'Intenta con otros términos de búsqueda.' : 'No hay fletes registrados aún.'}
                                     </p>
+                                    {!searchTerm && (
+                                        <button
+                                            onClick={handleCreate}
+                                            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                                        >
+                                            Registrar primer flete
+                                        </button>
+                                    )}
                                 </div>
                             )
                         }
@@ -126,10 +169,14 @@ export const FletesIndex = () => {
 
             <Modal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title="REGISTRAR NUEVO FLETE"
+                onClose={handleCloseModal}
+                title={editingFlete ? "EDITAR FLETE" : "REGISTRAR NUEVO FLETE"}
             >
-                <FletesForm />
+                <FletesForm
+                    flete={editingFlete}
+                    onSuccess={handleFormSuccess}
+                    onCancel={handleCloseModal}
+                />
             </Modal>
         </div>
     );
