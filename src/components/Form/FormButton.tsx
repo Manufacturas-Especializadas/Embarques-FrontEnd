@@ -25,7 +25,7 @@ const FormButton = ({
         <button
             type="button"
             disabled={disabled || loading}
-            className={`${baseClasses} ${variants[variant]} ${disabled || loading ? 'opacity-70 cursor-not-allowed' : ''} ${className}`}
+            className={`${baseClasses} ${variants[variant]} ${disabled || loading ? 'opacity-70 cursor-not-allowed' : ''} ${className} hover:cursor-pointer`}
             {...props}
         >
             {loading ? (
