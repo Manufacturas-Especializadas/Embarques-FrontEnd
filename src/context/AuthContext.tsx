@@ -15,6 +15,7 @@ interface AuthContextType {
     loading: boolean;
     isAuthenticated: boolean;
     isAdmin: boolean;
+    hasRole: (roles: string | string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +26,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const isAuthenticated = !!user;
     const isAdmin = user?.role === "Admin";
+
+    const hasRole = (roles: string | string[]): boolean => {
+        if (!isAuthenticated || !user?.role) return false;
+
+        const rolesToCheck = Array.isArray(roles) ? roles : [roles];
+        return rolesToCheck.includes(user.role);
+    };
 
     useEffect(() => {
         initializeAuth();
@@ -38,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUser({
                     id: payload.sub || payload.nameid,
                     name: payload.unique_name || payload.name,
-                    role: payload.role,
+                    role: payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
                     payrollNumber: payload.PayRollNumber || '',
                 });
             } catch (error) {
@@ -57,7 +65,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
             console.warn("Error llamando al backend logout:", error);
         } finally {
-            authService.clearLocalAuth();
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
             setUser(null);
         }
     };
@@ -74,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const newUser: User = {
                 id: payload.sub || payload.nameid,
                 name: payload.unique_name || payload.name,
-                role: payload.role,
+                role: payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
                 payrollNumber: payload.PayRollNumber || '',
             };
 
@@ -96,7 +105,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             logout,
             loading,
             isAuthenticated,
-            isAdmin
+            isAdmin,
+            hasRole
         }}>
             {children}
         </AuthContext.Provider>
