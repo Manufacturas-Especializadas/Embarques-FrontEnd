@@ -12,11 +12,46 @@ class ApiClient {
         return token ? { Authorization: `Bearer ${token}` } : {};
     }
 
+    private async handleResponse<T>(response: Response): Promise<T> {
+        const contentType = response.headers.get("content-type");
+
+        if (!response.ok) {
+            let errorMessage = `HTTP Error: ${response.status} - ${response.statusText}`;
+
+            try {
+                const errorText = await response.text();
+                if (errorText) {
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.message || errorJson.title || errorText;
+                    } catch {
+                        errorMessage = errorText;
+                    }
+                }
+            } catch {
+                errorMessage = `HTTP Error: ${response.status} - ${response.statusText}`;
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        if (response.status === 204 || response.status === 205) {
+            return null as unknown as T;
+        }
+
+        if (contentType && contentType.includes("application/json")) {
+            return response.json() as Promise<T>;
+        }
+
+        return null as unknown as T;
+    }
+
     private async request<T>(
         endpoint: string,
         options: RequestInit = {}
     ): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
+
         const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
@@ -26,40 +61,35 @@ class ApiClient {
             ...options,
         });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || `HTTP Error: ${response.status} - ${response.statusText}`);
-        }
-
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            return response.json() as Promise<T>;
-        }
-
-        return null as unknown as T;
+        return this.handleResponse<T>(response);
     }
 
     get<T>(endpoint: string) {
         return this.request<T>(endpoint, { method: 'GET' });
     }
 
-    async post<T>(endpoint: string, data: any): Promise<T> {
+    async post<T>(endpoint: string, data?: any): Promise<T> {
+        const options: RequestInit = {
+            method: "POST",
+        };
+
         if (data instanceof FormData) {
-            return this.request<T>(endpoint, {
-                method: "POST",
-                headers: this.getAuthHeaders(),
-                body: data,
-            });
+            options.headers = this.getAuthHeaders();
+            options.body = data;
+        } else if (data) {
+            options.headers = {
+                "Content-Type": "application/json",
+                ...this.getAuthHeaders(),
+            };
+            options.body = JSON.stringify(data);
         } else {
-            return this.request<T>(endpoint, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...this.getAuthHeaders(),
-                },
-                body: JSON.stringify(data),
-            });
+            options.headers = {
+                "Content-Type": "application/json",
+                ...this.getAuthHeaders(),
+            };
         }
+
+        return this.request<T>(endpoint, options);
     }
 
     async put<T>(endpoint: string, data: any): Promise<T> {
