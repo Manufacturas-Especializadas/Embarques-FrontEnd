@@ -32,6 +32,7 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
 
     const isProveedorSinCosto = supplierName === "UNIDAD MESA" ||
         supplierName === "RECOLECCIONES A PROVEEDOR" ||
+        supplierName === "RECOLECCION POR CLIENTE" ||
         supplierName === "ALEJANDRO CRUZ SOSA";
 
     const selectedDestination = destination.find(dest => dest.id === formData.idDestination);
@@ -175,6 +176,7 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
     const getProveedorSinCostoNombre = () => {
         if (supplierName === "UNIDAD MESA") return "Unidad MESA";
         if (supplierName === "RECOLECCIONES A PROVEEDOR") return "Recolecciones a Proveedor";
+        if (supplierName === "RECOLECCION POR CLIENTE") return "Recoleccion por Cliente";
         if (supplierName === "ALEJANDRO CRUZ SOSA") return "Alejandro Cruz Sosa";
         return "";
     };
@@ -218,7 +220,6 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                     required
                 />
 
-                {/* Mensaje cuando se selecciona proveedor sin costo */}
                 {isProveedorSinCosto && formData.idDestination > 0 && (
                     <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <p className="text-sm text-blue-800">
