@@ -26,8 +26,13 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
     const [isEditing] = useState(!!flete);
-    const selectedDestinationCost = destination.find(dest => dest.id === formData.idDestination)?.cost || 0;
 
+    const selectedSupplier = suppliers.find(sup => sup.id === formData.idSupplier);
+    const isUnidadMesa = selectedSupplier?.supplierName?.toUpperCase() === "UNIDAD MESA";
+
+    const selectedDestination = destination.find(dest => dest.id === formData.idDestination);
+    const originalDestinationCost = selectedDestination?.cost || 0;
+    const selectedDestinationCost = isUnidadMesa ? 0 : originalDestinationCost;
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -64,6 +69,16 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
         fetchData();
     }, [flete]);
 
+    useEffect(() => {
+        if (isUnidadMesa && (formData.highwayExpenseCost > 0 || formData.costOfStay > 0)) {
+            setFormData(prev => ({
+                ...prev,
+                highwayExpenseCost: 0,
+                costOfStay: 0
+            }));
+        }
+    }, [isUnidadMesa, formData.highwayExpenseCost, formData.costOfStay]);
+
     const supplierOptions = suppliers.map(supplier => ({
         value: supplier.id,
         label: supplier.supplierName
@@ -75,6 +90,10 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
     }));
 
     const handleInputChange = (field: keyof FletesFormData, value: string | number) => {
+        if (isUnidadMesa && (field === 'highwayExpenseCost' || field === 'costOfStay')) {
+            return;
+        }
+
         setFormData(prev => ({
             ...prev,
             [field]: value
@@ -103,10 +122,16 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
         try {
             let response;
 
+            const submitData = {
+                ...formData,
+                highwayExpenseCost: isUnidadMesa ? 0 : formData.highwayExpenseCost,
+                costOfStay: isUnidadMesa ? 0 : formData.costOfStay
+            };
+
             if (isEditing && flete) {
-                response = await fletesService.update(flete.id, formData);
+                response = await fletesService.update(flete.id, submitData);
             } else {
-                response = await fletesService.create(formData);
+                response = await fletesService.create(submitData);
             }
 
             if (response.success) {
@@ -181,31 +206,59 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                     required
                 />
 
+                {isUnidadMesa && formData.idDestination > 0 && (
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-800">
+                            <span className="font-medium">Proveedor Unidad MESA seleccionado: </span>
+                            No se aplicará ningún costo (ni costo base ni adicionales).
+                        </p>
+                    </div>
+                )}
+
                 {
                     formData.idDestination > 0 && (
-                        <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
-                            <p className="text-sm text-orange-800">
-                                <span className="font-medium">Costo de la ruta seleccionada: </span>
-                                ${selectedDestinationCost.toLocaleString()}
+                        <div className={`p-3 rounded-lg border ${isUnidadMesa ? 'bg-gray-50 border-gray-200' : 'bg-orange-50 border-orange-200'
+                            }`}>
+                            <p className={`text-sm ${isUnidadMesa ? 'text-gray-600' : 'text-orange-800'
+                                }`}>
+                                <span className="font-medium">
+                                    {isUnidadMesa ? 'Costo de la ruta seleccionada: ' : 'Costo de la ruta seleccionada: '}
+                                </span>
+                                {isUnidadMesa ? (
+                                    <>
+                                        <span className="line-through">${originalDestinationCost.toLocaleString()}</span>
+                                        <span className="ml-2">$0 (No aplica para Unidad MESA)</span>
+                                    </>
+                                ) : (
+                                    `$${selectedDestinationCost.toLocaleString()}`
+                                )}
                             </p>
+                            {isUnidadMesa && (
+                                <p className="text-sm text-blue-600 mt-1">
+                                    💡 El proveedor Unidad MESA no genera costos de flete.
+                                </p>
+                            )}
                         </div>
                     )
                 }
 
+
                 <InputField
                     label="Costo de gastos de autopista (opcional)"
                     type="number"
-                    value={formData.highwayExpenseCost || ""}
+                    value={isUnidadMesa ? 0 : formData.highwayExpenseCost || ""}
                     onChange={(e) => handleInputChange("highwayExpenseCost", Number(e.target.value))}
                     min="0"
+                    disabled={isUnidadMesa}
                 />
 
                 <InputField
                     label="Costo por estadía (opcional)"
                     type="number"
-                    value={formData.costOfStay || ""}
+                    value={isUnidadMesa ? 0 : formData.costOfStay || ""}
                     onChange={(e) => handleInputChange("costOfStay", Number(e.target.value))}
                     min="0"
+                    disabled={isUnidadMesa}
                 />
 
                 <div className="pt-4 flex gap-3">
