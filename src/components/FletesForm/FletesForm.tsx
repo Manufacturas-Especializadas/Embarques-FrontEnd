@@ -32,8 +32,7 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
 
     const isProveedorSinCosto = supplierName === "UNIDAD MESA" ||
         supplierName === "RECOLECCIONES A PROVEEDOR" ||
-        supplierName === "RECOLECCION POR CLIENTE" ||
-        supplierName === "ALEJANDRO CRUZ SOSA";
+        supplierName === "RECOLECCION POR CLIENTE"
 
     const selectedDestination = destination.find(dest => dest.id === formData.idDestination);
     const originalDestinationCost = selectedDestination?.cost || 0;
@@ -177,7 +176,6 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
         if (supplierName === "UNIDAD MESA") return "Unidad MESA";
         if (supplierName === "RECOLECCIONES A PROVEEDOR") return "Recolecciones a Proveedor";
         if (supplierName === "RECOLECCION POR CLIENTE") return "Recoleccion por Cliente";
-        if (supplierName === "ALEJANDRO CRUZ SOSA") return "Alejandro Cruz Sosa";
         return "";
     };
 
