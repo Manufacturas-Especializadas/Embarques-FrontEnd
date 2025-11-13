@@ -28,11 +28,16 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
     const [isEditing] = useState(!!flete);
 
     const selectedSupplier = suppliers.find(sup => sup.id === formData.idSupplier);
-    const isUnidadMesa = selectedSupplier?.supplierName?.toUpperCase() === "UNIDAD MESA";
+    const supplierName = selectedSupplier?.supplierName?.toUpperCase() || "";
+
+    const isProveedorSinCosto = supplierName === "UNIDAD MESA" ||
+        supplierName === "RECOLECCIONES A PROVEEDOR" ||
+        supplierName === "ALEJANDRO CRUZ SOSA";
 
     const selectedDestination = destination.find(dest => dest.id === formData.idDestination);
     const originalDestinationCost = selectedDestination?.cost || 0;
-    const selectedDestinationCost = isUnidadMesa ? 0 : originalDestinationCost;
+    const selectedDestinationCost = isProveedorSinCosto ? 0 : originalDestinationCost;
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -70,14 +75,14 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
     }, [flete]);
 
     useEffect(() => {
-        if (isUnidadMesa && (formData.highwayExpenseCost > 0 || formData.costOfStay > 0)) {
+        if (isProveedorSinCosto && (formData.highwayExpenseCost > 0 || formData.costOfStay > 0)) {
             setFormData(prev => ({
                 ...prev,
                 highwayExpenseCost: 0,
                 costOfStay: 0
             }));
         }
-    }, [isUnidadMesa, formData.highwayExpenseCost, formData.costOfStay]);
+    }, [isProveedorSinCosto, formData.highwayExpenseCost, formData.costOfStay]);
 
     const supplierOptions = suppliers.map(supplier => ({
         value: supplier.id,
@@ -90,7 +95,7 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
     }));
 
     const handleInputChange = (field: keyof FletesFormData, value: string | number) => {
-        if (isUnidadMesa && (field === 'highwayExpenseCost' || field === 'costOfStay')) {
+        if (isProveedorSinCosto && (field === 'highwayExpenseCost' || field === 'costOfStay')) {
             return;
         }
 
@@ -124,8 +129,8 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
 
             const submitData = {
                 ...formData,
-                highwayExpenseCost: isUnidadMesa ? 0 : formData.highwayExpenseCost,
-                costOfStay: isUnidadMesa ? 0 : formData.costOfStay
+                highwayExpenseCost: isProveedorSinCosto ? 0 : formData.highwayExpenseCost,
+                costOfStay: isProveedorSinCosto ? 0 : formData.costOfStay
             };
 
             if (isEditing && flete) {
@@ -167,6 +172,13 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
         }
     };
 
+    const getProveedorSinCostoNombre = () => {
+        if (supplierName === "UNIDAD MESA") return "Unidad MESA";
+        if (supplierName === "RECOLECCIONES A PROVEEDOR") return "Recolecciones a Proveedor";
+        if (supplierName === "ALEJANDRO CRUZ SOSA") return "Alejandro Cruz Sosa";
+        return "";
+    };
+
     return (
         <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="max-w-md overflow-y-auto space-y-3 px-4">
@@ -206,10 +218,11 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                     required
                 />
 
-                {isUnidadMesa && formData.idDestination > 0 && (
+                {/* Mensaje cuando se selecciona proveedor sin costo */}
+                {isProveedorSinCosto && formData.idDestination > 0 && (
                     <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <p className="text-sm text-blue-800">
-                            <span className="font-medium">Proveedor Unidad MESA seleccionado: </span>
+                            <span className="font-medium">Proveedor {getProveedorSinCostoNombre()} seleccionado: </span>
                             No se aplicará ningún costo (ni costo base ni adicionales).
                         </p>
                     </div>
@@ -217,48 +230,47 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
 
                 {
                     formData.idDestination > 0 && (
-                        <div className={`p-3 rounded-lg border ${isUnidadMesa ? 'bg-gray-50 border-gray-200' : 'bg-orange-50 border-orange-200'
+                        <div className={`p-3 rounded-lg border ${isProveedorSinCosto ? 'bg-gray-50 border-gray-200' : 'bg-orange-50 border-orange-200'
                             }`}>
-                            <p className={`text-sm ${isUnidadMesa ? 'text-gray-600' : 'text-orange-800'
+                            <p className={`text-sm ${isProveedorSinCosto ? 'text-gray-600' : 'text-orange-800'
                                 }`}>
                                 <span className="font-medium">
-                                    {isUnidadMesa ? 'Costo de la ruta seleccionada: ' : 'Costo de la ruta seleccionada: '}
+                                    Costo de la ruta seleccionada:
                                 </span>
-                                {isUnidadMesa ? (
+                                {isProveedorSinCosto ? (
                                     <>
                                         <span className="line-through">${originalDestinationCost.toLocaleString()}</span>
-                                        <span className="ml-2">$0 (No aplica para Unidad MESA)</span>
+                                        <span className="ml-2">$0 (No aplica para {getProveedorSinCostoNombre()})</span>
                                     </>
                                 ) : (
                                     `$${selectedDestinationCost.toLocaleString()}`
                                 )}
                             </p>
-                            {isUnidadMesa && (
+                            {isProveedorSinCosto && (
                                 <p className="text-sm text-blue-600 mt-1">
-                                    💡 El proveedor Unidad MESA no genera costos de flete.
+                                    💡 El proveedor {getProveedorSinCostoNombre()} no genera costos de flete.
                                 </p>
                             )}
                         </div>
                     )
                 }
 
-
                 <InputField
                     label="Costo de gastos de autopista (opcional)"
                     type="number"
-                    value={isUnidadMesa ? 0 : formData.highwayExpenseCost || ""}
+                    value={isProveedorSinCosto ? 0 : formData.highwayExpenseCost || ""}
                     onChange={(e) => handleInputChange("highwayExpenseCost", Number(e.target.value))}
                     min="0"
-                    disabled={isUnidadMesa}
+                    disabled={isProveedorSinCosto}
                 />
 
                 <InputField
                     label="Costo por estadía (opcional)"
                     type="number"
-                    value={isUnidadMesa ? 0 : formData.costOfStay || ""}
+                    value={isProveedorSinCosto ? 0 : formData.costOfStay || ""}
                     onChange={(e) => handleInputChange("costOfStay", Number(e.target.value))}
                     min="0"
-                    disabled={isUnidadMesa}
+                    disabled={isProveedorSinCosto}
                 />
 
                 <div className="pt-4 flex gap-3">
