@@ -18,7 +18,8 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
         idSupplier: 0,
         idDestination: 0,
         highwayExpenseCost: 0,
-        costOfStay: 0
+        costOfStay: 0,
+        registrationDate: ""
     });
     const [suppliers, setSuppliers] = useState<Suppliers[]>([]);
     const [destination, setDestination] = useState<Destination[]>([]);
@@ -62,7 +63,8 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                         idSupplier: foundSupplier?.id || 0,
                         idDestination: foundDestination?.id || 0,
                         highwayExpenseCost: flete.highwayExpenseCost || 0,
-                        costOfStay: flete.costOfStay || 0
+                        costOfStay: flete.costOfStay || 0,
+                        registrationDate: flete.registrationDate
                     });
                 }
             } catch (error: any) {
@@ -147,7 +149,8 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                         idSupplier: 0,
                         idDestination: 0,
                         highwayExpenseCost: 0,
-                        costOfStay: 0
+                        costOfStay: 0,
+                        registrationDate: ""
                     });
                 }
 
@@ -270,6 +273,13 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                     onChange={(e) => handleInputChange("costOfStay", Number(e.target.value))}
                     min="0"
                     disabled={isProveedorSinCosto}
+                />
+
+                <InputField
+                    label="Fecha"
+                    type="date"
+                    value={formData.registrationDate}
+                    onChange={(e) => handleInputChange("registrationDate", e.target.value)}
                 />
 
                 <div className="pt-4 flex gap-3">

@@ -8,6 +8,7 @@ export interface Flete {
     date: string;
     idSupplier: number;
     idDestination: number;
+    registrationDate: string;
 };
 
 export interface FletesTableProps {

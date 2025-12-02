@@ -159,7 +159,7 @@ export const FletesTable = ({ data, onDeleteSuccess, onEdit }: Props) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-500">
-                                            {flete.date}
+                                            {flete.registrationDate || "N/A"}
                                         </div>
                                     </td>
                                     <RoleGuard allowedRoles={["Admin"]}>

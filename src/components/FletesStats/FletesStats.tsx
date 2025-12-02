@@ -14,9 +14,9 @@ export const FletesStats = ({ data }: FletesStatsProps) => {
         const currentYear = currentDate.getFullYear();
 
         const filteredData = data.filter(flete => {
-            if (!flete.date) return false;
+            if (!flete.registrationDate) return false;
 
-            const parts = flete.date.split('/');
+            const parts = flete.registrationDate.split('/');
 
             const isoDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
