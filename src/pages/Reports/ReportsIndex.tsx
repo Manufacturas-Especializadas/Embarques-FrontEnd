@@ -1,10 +1,20 @@
 import { useNavigate } from "react-router-dom";
 import { ReportsTable } from "../../components/ReportsTable/ReportsTable";
+import { Modal } from "../../components/Modal/Modal";
+import { ReportByDateForm } from "../../components/ReportByDateForm/ReportByDateForm";
+import { useState } from "react";
 
 export const ReportsIndex = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
 
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
 
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,15 +46,31 @@ export const ReportsIndex = () => {
 
                 <div className="bg-white rounded-lg shadow-lg">
                     <div className="px-6 py-4 border-b border-gray-200">
-                        <h2>
-                            Lista de reportes
-                        </h2>
+                        <div className="flex justify-between">
+                            <h2>
+                                Lista de reportes
+                            </h2>
+                            <button
+                                onClick={handleOpenModal}
+                                className="px-3 py-2 bg-green-700 hover:bg-green-400 hover:cursor-pointer 
+                                text-white text-sm rounded-md">
+                                Reporte por fechas
+                            </button>
+                        </div>
                     </div>
                     <div className="p-6">
                         <ReportsTable />
                     </div>
                 </div>
             </div>
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title="REPORTE POR FECHAS"
+            >
+                <ReportByDateForm />
+            </Modal>
         </div>
     );
 };

@@ -19,6 +19,7 @@ export const API_CONFIG = {
         fletes: {
             getMonthsWithData: "/api/Fletes/GeMonthsWithData",
             generateMonthlyReport: "/api/Fletes/GenerateMonthlyReport",
+            generateReportByRange: "/api/Fletes/GenerateReportByDateRange",
             getFletesById: "/api/Fletes/GetFletesById/",
             create: "/api/Fletes/Create",
             update: "/api/Fletes/Update/",

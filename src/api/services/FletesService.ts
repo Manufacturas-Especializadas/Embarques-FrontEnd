@@ -23,9 +23,15 @@ export interface ReportRequest {
     month: number;
 }
 
+export interface ReportByDate {
+    startTime: string;
+    endTime: string;
+};
+
 class FletesService {
     private getMonthsEndpoint = API_CONFIG.endpoints.fletes.getMonthsWithData;
     private generateMonthlyReportEndpoint = API_CONFIG.endpoints.fletes.generateMonthlyReport;
+    private generateReportByDateRangeEndpoint = API_CONFIG.endpoints.fletes.generateReportByRange;
     private getFleteByIdEndpoint = API_CONFIG.endpoints.fletes.getFletesById;
     private createEndpoint = API_CONFIG.endpoints.fletes.create;
     private updateEndpoint = API_CONFIG.endpoints.fletes.update;
@@ -41,6 +47,21 @@ class FletesService {
         const filename = `Reporte_${monthName}_${year}.xlsx`;
 
         await apiClient.downloadFile(this.generateMonthlyReportEndpoint, filename, requestData);
+    };
+
+    async generateReportByDateRange(startDate: string, endDate: string): Promise<void> {
+        const requestData = {
+            startTime: startDate,
+            endTime: endDate
+        };
+
+        const fileName = `Report_${startDate}_a_${endDate}.xlsx`;
+
+        return apiClient.downloadFile(
+            this.generateReportByDateRangeEndpoint,
+            fileName,
+            requestData
+        );
     };
 
     async getFleteById(id: number): Promise<Flete> {
