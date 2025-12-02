@@ -110,6 +110,9 @@ export const FletesTable = ({ data, onDeleteSuccess, onEdit }: Props) => {
                                     Destino
                                 </th>
                                 <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Número de viaje
+                                </th>
+                                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Fecha
                                 </th>
                                 <RoleGuard allowedRoles={["Admin"]}>
@@ -156,6 +159,9 @@ export const FletesTable = ({ data, onDeleteSuccess, onEdit }: Props) => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">{flete.destination}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900">{flete.tripNumber || 0}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-500">

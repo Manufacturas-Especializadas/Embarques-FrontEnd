@@ -19,7 +19,8 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
         idDestination: 0,
         highwayExpenseCost: 0,
         costOfStay: 0,
-        registrationDate: ""
+        registrationDate: "",
+        tripNumber: 0
     });
     const [suppliers, setSuppliers] = useState<Suppliers[]>([]);
     const [destination, setDestination] = useState<Destination[]>([]);
@@ -64,7 +65,8 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                         idDestination: foundDestination?.id || 0,
                         highwayExpenseCost: flete.highwayExpenseCost || 0,
                         costOfStay: flete.costOfStay || 0,
-                        registrationDate: flete.registrationDate
+                        registrationDate: flete.registrationDate,
+                        tripNumber: flete.tripNumber || 0
                     });
                 }
             } catch (error: any) {
@@ -150,7 +152,8 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                         idDestination: 0,
                         highwayExpenseCost: 0,
                         costOfStay: 0,
-                        registrationDate: ""
+                        registrationDate: "",
+                        tripNumber: 0
                     });
                 }
 
@@ -273,6 +276,14 @@ export const FletesForm = ({ flete, onSuccess, onCancel }: Props) => {
                     onChange={(e) => handleInputChange("costOfStay", Number(e.target.value))}
                     min="0"
                     disabled={isProveedorSinCosto}
+                />
+
+                <InputField
+                    label="Número de viaje"
+                    type="number"
+                    value={formData.tripNumber || ""}
+                    onChange={(e) => handleInputChange("tripNumber", Number(e.target.value))}
+                    min="0"
                 />
 
                 <InputField

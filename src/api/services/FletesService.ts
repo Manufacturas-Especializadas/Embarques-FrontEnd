@@ -9,6 +9,7 @@ export interface FletesFormData {
     highwayExpenseCost: number;
     costOfStay: number;
     registrationDate: string;
+    tripNumber: number;
 };
 
 export interface FletesResponse {
